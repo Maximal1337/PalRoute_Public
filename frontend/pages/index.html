@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PalRoute — Palworld route planner</title>
+<meta name="description" content="Plan the fastest route to any Palworld POI. Fast-travel beacons are real graph edges, so teleporting and walking compete on the same units.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<link rel="stylesheet" href="/css/reset.css">
+<link rel="stylesheet" href="/css/theme.css">
+<link rel="stylesheet" href="/css/layout.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/map.css">
+</head>
+<body>
+
+<a class="skip-link" href="#map-region">Skip to map</a>
+
+<header class="topbar">
+  <button class="icon-btn topbar__menu" id="btn-sidebar" aria-label="Toggle filters" aria-expanded="false" aria-controls="sidebar">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+
+  <div class="brand">
+    <span class="brand__mark" aria-hidden="true">🧭</span>
+    <div class="brand__text">
+      <strong>PalRoute</strong>
+      <span class="brand__sub">Palworld route planner</span>
+    </div>
+  </div>
+
+  <div class="topbar__spacer"></div>
+
+  <div class="conn" id="conn" data-state="connecting">
+    <span class="conn__dot" aria-hidden="true"></span>
+    <span class="conn__label" id="conn-label">connecting…</span>
+  </div>
+
+  <button class="icon-btn" id="btn-results" aria-label="Toggle results panel" aria-expanded="false" aria-controls="results">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+  </button>
+</header>
+
+<div class="app">
+
+  <!-- ------------------------------------------------------------------ -->
+  <aside class="sidebar" id="sidebar" aria-label="Query controls">
+    <div class="sidebar__scroll">
+
+      <section class="panel">
+        <h2 class="panel__title">Mode</h2>
+        <div class="segmented" role="radiogroup" aria-label="Query mode">
+          <button role="radio" aria-checked="true"  data-mode="nearest">Nearest</button>
+          <button role="radio" aria-checked="false" data-mode="route">Route</button>
+          <button role="radio" aria-checked="false" data-mode="tour">Tour</button>
+        </div>
+        <p class="hint" id="mode-hint">Rank POIs by travel time from your unlocked beacons.</p>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel__title">Filters</h2>
+
+        <label class="field">
+          <span class="field__label">Kind <span class="field__unit" id="kind-count"></span></span>
+          <select id="f-kind" multiple size="6" aria-describedby="multi-hint"></select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Biome <span class="field__unit" id="biome-count"></span></span>
+          <select id="f-biome" multiple size="6" aria-describedby="multi-hint"></select>
+        </label>
+        <p class="hint" id="multi-hint">
+          Ctrl/⌘-click to pick several, or drag. Nothing selected = no filter.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn--sm" id="filters-reset">Reset filters</button>
+        </div>
+        <p class="hint hint--warn" id="filter-diagnosis" hidden></p>
+
+        <div class="field field--row">
+          <label class="field">
+            <span class="field__label">Level min</span>
+            <input type="number" id="f-level-min" min="0" max="100" placeholder="—">
+          </label>
+          <label class="field">
+            <span class="field__label">Level max</span>
+            <input type="number" id="f-level-max" min="0" max="100" placeholder="—">
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="field__label">Search</span>
+          <input type="search" id="f-search" placeholder="name or id…" autocomplete="off">
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel__title">Travel</h2>
+
+        <label class="field">
+          <span class="field__label">Mount</span>
+          <select id="f-mount"></select>
+        </label>
+        <p class="hint" id="mount-hint"></p>
+
+        <label class="field">
+          <span class="field__label">Teleport cost <span class="field__unit" id="tp-value">20 s</span></span>
+          <input type="range" id="f-teleport" min="0" max="90" step="1" value="20">
+        </label>
+      </section>
+
+      <section class="panel">
+        <div class="panel__head">
+          <h2 class="panel__title">Unlocked beacons</h2>
+          <span class="pill" id="beacon-count">0</span>
+        </div>
+        <p class="hint">
+          This is the single biggest lever on the answer — six beacons gives a
+          genuinely different route than forty. Default is <strong>none</strong>.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn--sm" id="beacons-all">Select all</button>
+          <button class="btn btn--sm" id="beacons-none">Clear</button>
+        </div>
+        <input type="search" id="beacon-search" class="beacon-search" placeholder="filter beacons…" autocomplete="off">
+        <div class="beacon-list" id="beacon-list" role="group" aria-label="Unlocked beacons"></div>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel__title">Display</h2>
+        <label class="check"><input type="checkbox" id="opt-labels"> <span>POI labels</span></label>
+        <label class="check"><input type="checkbox" id="opt-all-pois" checked> <span>Show unmatched POIs</span></label>
+        <label class="check"><input type="checkbox" id="opt-basemap-on" checked> <span>Base map</span></label>
+        <label class="check"><input type="checkbox" id="opt-offmap" checked> <span>Off-map regions</span></label>
+        <label class="check"><input type="checkbox" id="opt-grid"> <span>Coordinate grid</span></label>
+        <p class="hint" id="offmap-note" hidden></p>
+
+        <label class="field">
+          <span class="field__label">Map brightness <span class="field__unit" id="opacity-value">92%</span></span>
+          <input type="range" id="opt-opacity" min="15" max="100" step="1" value="92">
+        </label>
+
+        <details class="disclosure" id="align-panel">
+          <summary>Align base map</summary>
+          <p class="hint" id="basemap-fit-note"></p>
+
+          <label class="field">
+            <span class="field__label">Scale <span class="field__unit" id="al-scale-v"></span></span>
+            <input type="range" id="al-scale" min="0.10" max="0.60" step="0.0005">
+          </label>
+          <label class="field">
+            <span class="field__label">Shift X <span class="field__unit" id="al-x-v"></span></span>
+            <input type="range" id="al-x" min="-400" max="1400" step="1">
+          </label>
+          <label class="field">
+            <span class="field__label">Shift Y <span class="field__unit" id="al-y-v"></span></span>
+            <input type="range" id="al-y" min="-400" max="1400" step="1">
+          </label>
+          <div class="btn-row">
+            <button class="btn btn--sm" id="al-flipx">Flip X</button>
+            <button class="btn btn--sm" id="al-flipy">Flip Y</button>
+            <button class="btn btn--sm" id="al-reset">Reset</button>
+          </div>
+          <p class="hint">Saved locally as you drag.</p>
+        </details>
+
+        <details class="disclosure">
+          <summary>Use a different map image</summary>
+          <input type="file" id="opt-basemap" accept="image/*">
+        </details>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- ------------------------------------------------------------------ -->
+  <main class="map-region" id="map-region">
+    <div class="map-wrap" id="map-wrap">
+      <canvas id="map" aria-label="Palworld map. Drag to pan, scroll to zoom, click a point of interest to route to it."></canvas>
+
+      <div class="map-overlay map-overlay--tl">
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="map-overlay map-overlay--tr">
+        <div class="zoom-controls">
+          <button class="icon-btn" id="zoom-in"  aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="icon-btn" id="zoom-out" aria-label="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+          <button class="icon-btn" id="zoom-fit" aria-label="Fit to view"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        </div>
+      </div>
+
+      <div class="map-overlay map-overlay--bl">
+        <div class="scalebar" id="scalebar"><span class="scalebar__bar"></span><span class="scalebar__text">—</span></div>
+      </div>
+
+      <div class="tooltip" id="tooltip" hidden></div>
+
+      <div class="map-empty" id="map-empty" hidden>
+        <div class="map-empty__inner">
+          <h3 id="map-empty-title">Can't reach the API</h3>
+          <p id="map-empty-body"></p>
+          <button class="btn" id="retry">Retry</button>
+        </div>
+      </div>
+
+      <div class="map-loading" id="map-loading" hidden><span class="spinner"></span></div>
+    </div>
+  </main>
+
+  <!-- ------------------------------------------------------------------ -->
+  <aside class="results" id="results" aria-label="Results">
+    <div class="results__head">
+      <h2 id="results-title">Results</h2>
+      <span class="pill" id="results-meta"></span>
+    </div>
+    <div class="results__scroll" id="results-body">
+      <p class="empty-note">Pick a mode and press <kbd>Run</kbd>.</p>
+    </div>
+    <div class="results__foot">
+      <button class="btn btn--primary btn--grow" id="run">Run</button>
+      <button class="btn" id="clear" title="Remove the drawn route and results (Shift+Esc)">Clear</button>
+    </div>
+  </aside>
+
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<!-- Deployment config. Plain script, loaded before the app modules. -->
+<script src="/scripts/config.js"></script>
+<script type="module" src="/scripts/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "lock_version": 1,
+  "entries": {
+    "psp_l10n_fast_travel_en": {
+      "id": "psp_l10n_fast_travel_en",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/l10n/en/fast_travel_points.json",
+      "sha256": "61292cc474a45612ebacc04ec3b7b7ac87920dafaab68b544f416a3f405a02ce",
+      "bytes": 15670,
+      "row_count": 174,
+      "fetched_at": "2026-08-05T12:25:55.004Z",
+      "license": "unlicensed-upstream",
+      "notes": "English names for fast travel points, keyed by the same GUID as psp_fast_travel_points."
+    },
+    "psp_l10n_pals_en": {
+      "id": "psp_l10n_pals_en",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/l10n/en/pals.json",
+      "sha256": "aa3d3e458e3b8075b7dd730b60558a67483e2300262cb0f5983aa8a851c9b2eb",
+      "bytes": 135422,
+      "row_count": 809,
+      "fetched_at": "2026-08-03T08:06:38.781Z",
+      "license": "unlicensed-upstream",
+      "notes": "English Pal names, keyed by code name with no BOSS_ prefix."
+    },
+    "psp_fast_travel_points": {
+      "id": "psp_fast_travel_points",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/fast_travel_points.json",
+      "sha256": "55ae36ca6a8c5d8cca32113e755f6c4f85691e3a4ee36bba007daf314b68ba18",
+      "bytes": 31329,
+      "row_count": 174,
+      "fetched_at": "2026-08-05T12:25:55.126Z",
+      "license": "unlicensed-upstream",
+      "notes": "Fast travel statues and map-unlock obelisks. Split by `class`: only TowerFastTravelPoint entries are real teleport endpoints."
+    },
+    "psp_effigies": {
+      "id": "psp_effigies",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/effigies.json",
+      "sha256": "fea562c1d73f86c0168ce9dbcd73b71da8f61423e8e32c0a179a622a6cb919f9",
+      "bytes": 15615,
+      "row_count": 153,
+      "fetched_at": "2026-08-03T08:06:39.211Z",
+      "license": "unlicensed-upstream",
+      "notes": "Lifmunk effigy positions. Coordinates only, no metadata."
+    },
+    "psp_bosses": {
+      "id": "psp_bosses",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/bosses.json",
+      "sha256": "affce1fa6b4fab3cfae9f206497517572c98cc4d3256dd09fb5f19dfcf072a36",
+      "bytes": 26744,
+      "row_count": 159,
+      "fetched_at": "2026-08-03T08:06:39.427Z",
+      "license": "unlicensed-upstream",
+      "notes": "Boss spawners. Rows whose character_id is the literal \"None\" are human/NPC bosses, not alpha Pals, and are emitted as field_boss."
+    },
+    "psp_map_objects": {
+      "id": "psp_map_objects",
+      "url": "https://raw.githubusercontent.com/oMaN-Rod/palworld-save-pal/main/data/json/map_objects.json",
+      "sha256": "e6678d361756b73c81333f82b64bd928cd4100765f9a936ad9645ff453abc137",
+      "bytes": 22204,
+      "row_count": 271,
+      "fetched_at": "2026-08-05T12:25:55.281Z",
+      "license": "unlicensed-upstream",
+      "notes": "Dungeon entrances and predator Pals. This file has NO z coordinate — every POI from it is flagged z_estimated. alpha_pal rows are dropped because psp_bosses covers the same spawns with z and level."
+    }
+  }
+}

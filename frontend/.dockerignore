@@ -1,0 +1,43 @@
+# Only pages/, css/, scripts/ and data/ ship. nginx.conf and
+# docker-entrypoint.sh must stay in the context — the Dockerfile COPYs them.
+
+# Dev server and its deps — the production image is nginx, with no Node in it.
+node_modules/
+server.js
+package.json
+package-lock.json
+
+# Read by the builder, never copied in.
+Dockerfile
+.dockerignore
+vercel.json
+.vercel/
+
+# Git, including .git/config which may hold credentials in a remote URL.
+.git/
+.gitignore
+
+# Secrets.
+.env
+.env.*
+*.pem
+*.key
+
+# Docs and editor state.
+README.md
+*.md
+.claude/
+.cursor/
+.vscode/
+.idea/
+
+# OS artifacts, including OneDrive's markers.
+.DS_Store
+Thumbs.db
+desktop.ini
+.tmp.drivedownload/
+.tmp.driveupload/
+
+# Logs.
+*.log
+logs/

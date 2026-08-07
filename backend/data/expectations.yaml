@@ -1,0 +1,78 @@
+# Validation expectations. `palroute validate` checks the built dataset against
+# these and exits non-zero on violation. Ranges are loose enough to survive a
+# minor patch, tight enough to trip on a broken import.
+
+game_version: "1.0-community-2026-08"
+
+# World extents in Unreal units, from the observed data spread plus margin.
+# A coordinate outside this box means a bad parse or a coordinate-space mixup.
+world_bounds:
+  min_x: -1400000
+  max_x: 800000
+  min_y: -900000
+  max_y: 800000
+  min_z: -60000
+  max_z: 120000
+
+# Expected count per kind. `min: 0` with a `gap_reason` marks a kind the sources
+# cannot supply, so a zero reads as acknowledged rather than as a failure.
+counts_by_kind:
+  fast_travel:      { min: 100, max: 200 }
+  map_unlock:       { min: 10,  max: 60 }
+  alpha_boss:       { min: 60,  max: 160 }
+  # Set against the deduplicated count — upstream ships 69 rows, 33 of them
+  # exact duplicates, so reintroducing them trips the upper bound.
+  field_boss:       { min: 25,  max: 55 }
+  effigy:           { min: 120, max: 200 }
+  dungeon_entrance: { min: 120, max: 250 }
+  predator:         { min: 15,  max: 60 }
+  palbox:
+    min: 0
+    max: 64
+    gap_reason: >-
+      PalBoxes are player-placed structures. They cannot come from static
+      extracted data; supply them via --manual-pois or the /pois manual
+      overlay if you want your own bases as teleport endpoints.
+  tower_boss:
+    min: 0
+    max: 12
+    gap_reason: >-
+      No tower-boss coordinates exist in the fetched community sources. The
+      class name BP_LevelObject_TowerFastTravelPoint_C is used for ALL fast
+      travel points, not just towers, so it cannot be used to infer them.
+  dungeon_boss:
+    min: 0
+    max: 400
+    gap_reason: >-
+      Dungeon interiors are procedurally generated; interior boss positions
+      are not static, so there is nothing to extract.
+  merchant:  { min: 0, max: 200, gap_reason: "Not present in fetched sources." }
+  chest:     { min: 0, max: 60000, gap_reason: "Not present in fetched sources." }
+  ore_node:  { min: 0, max: 60000, gap_reason: "Not present in fetched sources." }
+
+# Same-kind POIs closer than this are almost certainly a double import.
+duplicate_radius_metres:
+  default: 25
+  # Dungeon entrances legitimately cluster; effigies do not.
+  dungeon_entrance: 10
+
+# Minimum fraction of POIs carrying a non-null biome. Only boss spawners expose
+# a hint, so ~80% legitimately have none — this is a regression detector for
+# biome inference breaking entirely, not a quality target. Raising it needs a
+# real biome source, not looser guessing.
+min_biome_coverage: 0.15
+
+# Fraction of POIs allowed to have an estimated (substituted) Z.
+max_z_estimated_fraction: 0.55
+
+# Coordinate-system sanity: published world/map correspondences the fitted
+# transform must reproduce. Catches a world-space/map-space mixup.
+calibration:
+  - label: anubis-reference
+    world: { x: -167230, y: 96430 }
+    map: { x: -134, y: -94 }
+    tolerance: 2
+  - label: base-reference
+    world: { x: -288669, y: 329207 }
+    map: { x: 373, y: -359 }
+    tolerance: 2

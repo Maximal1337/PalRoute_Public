@@ -1,0 +1,33 @@
+node_modules/
+*.log
+logs/
+
+# Secrets — nothing here needs one, and these keep it that way.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# AI / agent tooling
+.claude/
+.cursor/
+.aider*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# OS / OneDrive
+.DS_Store
+Thumbs.db
+desktop.ini
+.tmp.drivedownload/
+.tmp.driveupload/
+
+# User-supplied base map images are not ours to redistribute.
+assets/basemap*
+*.local.*

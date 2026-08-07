@@ -1,0 +1,87 @@
+# Repository root. Patterns here have no internal slash, so they match at any
+# depth. Package-specific paths live in backend/.gitignore and
+# frontend/.gitignore, which anchor to their own directories.
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Test and coverage
+coverage/
+.nyc_output/
+.vitest/
+*.lcov
+junit.xml
+
+# Derived caches
+.cache/
+.vite/
+.turbo/
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.keystore
+id_rsa*
+id_ed25519*
+.netrc
+.npmrc
+secrets.json
+credentials.json
+service-account*.json
+
+# AI / agent tooling
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.cursor/
+.cursorrules
+.aider*
+.windsurf/
+.continue/
+.specstory/
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+*.swp
+*~
+.history/
+
+# OS artifacts, including OneDrive markers
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+.tmp.drivedownload/
+.tmp.driveupload/
+
+# Logs and runtime
+*.log
+logs/
+npm-debug.log*
+*.pid
+
+# Scratch
+tmp/
+temp/
+scratch/
+*.tmp
+*.bak
+*.orig
+*.rej

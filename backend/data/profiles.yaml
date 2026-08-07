@@ -1,0 +1,66 @@
+# Movement profiles. Edge weight is seconds; speeds are metres/second.
+#
+# None of these numbers are extracted or measured — they are order-of-magnitude
+# estimates, flagged `estimate-unverified` and surfaced as such. Replace them
+# with measured values before trusting absolute times. Relative comparisons
+# (teleport vs walk) are far less sensitive to them than absolute ETAs.
+
+default_profile: none
+
+# Map screen + load.
+teleport_cost_seconds: 20
+
+# Charged once for opening the map at all.
+map_open_cost_seconds: 3
+
+# Loading screen plus estimated interior traversal. Interiors are procedural and
+# not modelled, so these are constants and every portal edge is flagged estimated.
+dungeon_enter_cost_seconds:
+  default: 180
+  dungeon: 180
+  tower: 240
+
+profiles:
+  - name: none
+    description: On foot. Cliffs and water dominate; teleports are strongly favoured.
+    v_ground: 5.5
+    v_climb: 1.6
+    v_glide: 7.0
+    v_swim: 2.2
+    v_mount: null
+    water_penalty: 1.6
+    can_fly: false
+    speed_source: estimate-unverified
+
+  - name: direhowl
+    description: Ground mount. Faster overland, still blocked by water and cliffs.
+    v_ground: 9.5
+    v_climb: 2.2
+    v_glide: 8.0
+    v_swim: 2.6
+    v_mount: null
+    water_penalty: 1.5
+    can_fly: false
+    speed_source: estimate-unverified
+
+  - name: nitewing
+    description: Early flying mount. Terrain stops mattering; teleports lose some edge.
+    v_ground: 6.0
+    v_climb: 3.0
+    v_glide: 9.0
+    v_swim: 2.4
+    v_mount: 13.0
+    water_penalty: 1.0
+    can_fly: true
+    speed_source: estimate-unverified
+
+  - name: jetragon
+    description: Fastest flying mount. Direct flight usually beats teleport plus walk.
+    v_ground: 6.0
+    v_climb: 4.0
+    v_glide: 12.0
+    v_swim: 2.4
+    v_mount: 28.0
+    water_penalty: 1.0
+    can_fly: true
+    speed_source: estimate-unverified

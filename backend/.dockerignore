@@ -1,0 +1,49 @@
+# Keep the build context small and prevent local state leaking into the image.
+# The Dockerfile COPYs explicit paths, so this is about context size and safety.
+
+# Dependencies and build output — reinstalled/rebuilt inside the image.
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Derived data. The image fetches and builds these itself from sources.lock.json.
+data/vendor/
+data/pois.json
+.cache/
+
+# Git, including .git/config which may hold credentials in a remote URL.
+.git/
+.gitignore
+
+# Secrets — none are needed, and none should ever reach a layer.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
+secrets.json
+credentials.json
+
+# Tests, docs and editor state — not needed at runtime.
+test/
+Docs/
+vitest.config.ts
+README.md
+*.md
+
+# Agent tooling and OS artifacts.
+.claude/
+.cursor/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and scratch.
+*.log
+logs/
+tmp/
+temp/

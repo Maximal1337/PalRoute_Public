@@ -1,0 +1,93 @@
+/* Design tokens. Dark-first, with a light theme following the OS preference.
+   Travel-mode colours are load-bearing: --mode-teleport is the most saturated
+   hue and the only dashed one, so a doubled-back route cannot read as a bug. */
+:root {
+  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* surfaces, dark */
+  --bg:        #0b0d12;
+  --surface-1: #11141b;
+  --surface-2: #171b24;
+  --surface-3: #1e2330;
+  --surface-4: #262c3b;
+  --line:      #2a3040;
+  --line-soft: #20252f;
+
+  /* text */
+  --fg:        #e7eaf2;
+  --fg-muted:  #9aa4bb;
+  --fg-faint:  #6b7590;
+
+  /* brand + state */
+  --accent:      #6ea8fe;
+  --accent-ink:  #06090f;
+  --accent-soft: rgba(110, 168, 254, .14);
+  --ok:      #4ade80;
+  --warn:    #fbbf24;
+  --danger:  #f87171;
+
+  /* travel modes — mirrored in scripts/palette.js */
+  --mode-walk:     #6ea8fe;
+  --mode-fly:      #4ade80;
+  --mode-swim:     #38bdf8;
+  --mode-teleport: #d474f0;
+  --mode-portal:   #fbbf24;
+
+  /* POI kinds */
+  --kind-fast_travel:      #d474f0;
+  --kind-palbox:           #f0a1ff;
+  --kind-alpha_boss:       #fb7185;
+  --kind-field_boss:       #fb923c;
+  --kind-predator:         #ef4444;
+  --kind-effigy:           #facc15;
+  --kind-dungeon_entrance: #38bdf8;
+  --kind-dungeon_boss:     #22d3ee;
+  --kind-map_unlock:       #94a3b8;
+  --kind-tower_boss:       #a78bfa;
+  --kind-merchant:         #34d399;
+  --kind-chest:            #fcd34d;
+  --kind-ore_node:         #a3a3a3;
+
+  --radius:    12px;
+  --radius-sm: 8px;
+  --shadow-1: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-2: 0 8px 24px rgba(0,0,0,.45);
+  --shadow-3: 0 16px 48px rgba(0,0,0,.55);
+
+  --sidebar-w: 310px;
+  --results-w: 360px;
+  --topbar-h:  56px;
+
+  --ease: cubic-bezier(.2, .7, .3, 1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:        #f5f7fb;
+    --surface-1: #ffffff;
+    --surface-2: #f0f3f9;
+    --surface-3: #e5eaf3;
+    --surface-4: #d8dfec;
+    --line:      #d3dae7;
+    --line-soft: #e4e9f2;
+
+    --fg:       #131822;
+    --fg-muted: #4d586e;
+    --fg-faint: #78829a;
+
+    --accent:     #2563eb;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(37, 99, 235, .12);
+
+    --mode-walk:     #2563eb;
+    --mode-fly:      #16a34a;
+    --mode-swim:     #0284c7;
+    --mode-teleport: #a21caf;
+    --mode-portal:   #b45309;
+
+    --shadow-1: 0 1px 2px rgba(16,24,40,.08);
+    --shadow-2: 0 8px 24px rgba(16,24,40,.10);
+    --shadow-3: 0 16px 48px rgba(16,24,40,.14);
+  }
+}

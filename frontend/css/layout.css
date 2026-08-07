@@ -1,0 +1,147 @@
+/* App shell. Desktop: sidebar / map / results, map takes the slack. Tablet:
+   results become a drawer. Mobile: both panels drawer, map full-bleed. */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 0 .75rem;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar__spacer { flex: 1; }
+.topbar__menu { display: none; }
+
+.brand { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+.brand__mark { font-size: 1.35rem; line-height: 1; }
+.brand__text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.brand__text strong { font-size: 1rem; letter-spacing: -.01em; }
+.brand__sub {
+  font-size: .72rem;
+  color: var(--fg-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--results-w);
+  height: calc(100dvh - var(--topbar-h));
+}
+
+.sidebar,
+.results {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-1);
+}
+.sidebar { border-right: 1px solid var(--line); }
+.results { border-left: 1px solid var(--line); }
+
+.sidebar__scroll,
+.results__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar__scroll { padding: .75rem; }
+.results__scroll { padding: .5rem .75rem 1rem; }
+
+.results__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .85rem .75rem .6rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.results__head h2 { font-size: .95rem; letter-spacing: -.01em; }
+
+.results__foot {
+  display: flex;
+  gap: .5rem;
+  padding: .75rem;
+  border-top: 1px solid var(--line-soft);
+  background: var(--surface-1);
+}
+.results__foot .btn--grow { flex: 1; }
+
+.map-region { position: relative; min-width: 0; min-height: 0; }
+
+/* Thin scrollbars for the scrolling panels. */
+.sidebar__scroll, .results__scroll, .beacon-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-4) transparent;
+}
+.sidebar__scroll::-webkit-scrollbar,
+.results__scroll::-webkit-scrollbar,
+.beacon-list::-webkit-scrollbar { width: 10px; }
+.sidebar__scroll::-webkit-scrollbar-thumb,
+.results__scroll::-webkit-scrollbar-thumb,
+.beacon-list::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border-radius: 99px;
+  border: 3px solid var(--surface-1);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(2px);
+}
+
+/* ---- tablet: results become a drawer ---- */
+@media (max-width: 1180px) {
+  .app { grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+
+  .results {
+    position: fixed;
+    top: var(--topbar-h);
+    right: 0;
+    bottom: 0;
+    z-index: 26;
+    width: min(var(--results-w), 88vw);
+    transform: translateX(100%);
+    transition: transform .26s var(--ease);
+    box-shadow: var(--shadow-3);
+  }
+  .results[data-open="true"] { transform: none; }
+}
+
+/* ---- mobile: both panels drawer, map full-bleed ---- */
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .topbar__menu { display: inline-flex; }
+
+  .sidebar {
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0;
+    bottom: 0;
+    z-index: 26;
+    width: min(var(--sidebar-w), 86vw);
+    transform: translateX(-100%);
+    transition: transform .26s var(--ease);
+    box-shadow: var(--shadow-3);
+  }
+  .sidebar[data-open="true"] { transform: none; }
+
+  .brand__sub { display: none; }
+}
+
+@media (max-width: 420px) {
+  :root { --topbar-h: 52px; }
+  .conn__label { display: none; }
+}

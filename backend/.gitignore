@@ -1,0 +1,32 @@
+# Backend package. These patterns contain slashes, so they anchor to this
+# directory rather than matching at any depth.
+
+# Third-party source data. The upstream publishes no LICENSE, so neither the
+# vendored JSON nor pois.json (derived from it) is committed. sources.lock.json
+# IS committed and pins every input by SHA-256. Rebuild with:
+#     npm run data:fetch && npm run data:build
+data/vendor/
+data/pois.json
+
+# Pak exports and Tier A terrain data, extracted from a local game install.
+data/pak/
+data/exports/
+data/heightmap*
+*.pak
+*.usmap
+*.ucas
+*.utoc
+*.uasset
+*.umap
+*.raw
+*.r16
+
+# Dev journal and scratch notes — local only. PALROUTE_SPEC.md IS committed.
+Docs/Changes.md
+Docs/Notes.md
+
+# Personal save-derived files. beacons.example.json and beacons.all.json ARE committed.
+data/beacons.local.json
+data/my-*.json
+data/save/
+*.sav

@@ -1,0 +1,42 @@
+{
+  "name": "palroute",
+  "version": "0.1.0",
+  "description": "Static POI routing for Palworld: multi-source Dijkstra over a layered graph where fast-travel beacons are real edges.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "palroute": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "tsx src/cli.ts",
+    "serve": "tsx src/api/server.ts",
+    "serve:prod": "node dist/api/server.js",
+    "data:fetch": "tsx src/cli.ts data fetch",
+    "data:build": "tsx src/cli.ts data build",
+    "validate": "tsx src/cli.ts validate",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@fastify/rate-limit": "^10.3.0",
+    "commander": "^12.1.0",
+    "fastify": "^5.1.0",
+    "yaml": "^2.6.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

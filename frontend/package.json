@@ -1,0 +1,12 @@
+{
+  "name": "palroute-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive map UI for PalRoute. Static artefact — no build step, no runtime. Deploys to any static host.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}
