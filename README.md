@@ -99,15 +99,17 @@ Typecheck is two passes. The build config has to exclude `test/` to keep it out 
 
 Of the 79 tests, **53 run in CI**. The other 26 assert against the shipped dataset, and `data/pois.json` is deliberately not committed; rebuilding it would make the gate depend on six upstream sources being reachable. They skip themselves with `describe.runIf`, so the count is honest rather than quietly conditional — run them locally after `npm --prefix backend run data:fetch && npm --prefix backend run data:build`.
 
-The three matrix jobs and the frontend job feed one aggregate check, **`all checks green`**. Require *that* one in branch protection, not the individual jobs: their names carry the Node version, so changing the matrix would silently drop the requirement and let red pull requests through.
+The three matrix jobs and the frontend job feed one aggregate check, **`all checks green`**. That is the one to require, not the individual jobs: their names carry the Node version, so changing the matrix would silently drop the requirement and let red pull requests through.
 
-[`branch-protection.json`](.github/branch-protection.json) is that rule as the API takes it — the aggregate check required, the branch up to date before merge, one approving review, and approvals dismissed when new commits land, so nobody approves one diff and merges another. Apply it once, substituting the default branch:
+The default branch is protected by a **ruleset**, not by the older branch-protection API — rulesets are available on free private repositories, where that API answers 403 and tells you to upgrade. [`ruleset.json`](.github/ruleset.json) is the rule exactly as it was applied: pull request required, the aggregate check required, the branch up to date before merging, force pushes and deletion blocked, and approvals dismissed when new commits land so nobody approves one diff and merges another.
 
 ```bash
-gh api -X PUT repos/:owner/:repo/branches/main/protection --input .github/branch-protection.json
+curl -X POST -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" --data-binary @.github/ruleset.json https://api.github.com/repos/OWNER/REPO/rulesets
 ```
 
-`enforce_admins` stays `false` on purpose: on a repository with one maintainer, a required review nobody else can give would otherwise wall you off from your own default branch.
+The token needs **Administration: Read and write** for that one call; pushing needs only **Contents** and **Workflows**. Settings → Rules → Rulesets does the same thing by hand, with no token at all.
+
+`required_approving_review_count` is **0** on purpose. GitHub does not let you approve your own pull request, so on a single-maintainer repository a required review is one nobody can give. Everything else still holds: the change goes through a pull request and the checks still have to be green. Raise it to 1 the moment a second person can review, and consider adding yourself to `bypass_actors` only if you want an escape hatch — right now there is none, deliberately.
 
 ## Layout
 
@@ -123,7 +125,7 @@ frontend/         The UI. No build step
   nginx.conf      production routing and cache headers
   server.js       DEV ONLY static server + /api proxy
 assets/           README screenshot
-.github/          CI workflow and the branch protection rule it gates on
+.github/          CI workflow and the ruleset that gates on it
 ```
 
 ## Credits
