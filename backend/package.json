@@ -23,7 +23,9 @@
     "validate": "tsx src/cli.ts validate",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run typecheck:src && npm run typecheck:test",
+    "typecheck:src": "tsc -p tsconfig.json --noEmit",
+    "typecheck:test": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.1",

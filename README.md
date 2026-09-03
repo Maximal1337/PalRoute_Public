@@ -91,6 +91,24 @@ The design rationale lives in [**PALROUTE_SPEC.md**](backend/Docs/PALROUTE_SPEC.
 npm --prefix backend test
 ```
 
+## Continuous integration
+
+Every pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml): typecheck and the test suite on Node 20.11, 22 and 24 — the engines floor, the version in the Docker image, and current — plus a parse of every frontend module, since a UI with no build step would otherwise find its syntax errors in the browser.
+
+Typecheck is two passes. The build config has to exclude `test/` to keep it out of `dist/`, and Vitest transpiles the suite without checking it, so [`backend/tsconfig.test.json`](backend/tsconfig.test.json) covers the tests at the same strictness with `noEmit`. Without it the tests were the one unchecked corner of the codebase.
+
+Of the 79 tests, **53 run in CI**. The other 26 assert against the shipped dataset, and `data/pois.json` is deliberately not committed; rebuilding it would make the gate depend on six upstream sources being reachable. They skip themselves with `describe.runIf`, so the count is honest rather than quietly conditional — run them locally after `npm --prefix backend run data:fetch && npm --prefix backend run data:build`.
+
+The three matrix jobs and the frontend job feed one aggregate check, **`all checks green`**. Require *that* one in branch protection, not the individual jobs: their names carry the Node version, so changing the matrix would silently drop the requirement and let red pull requests through.
+
+[`branch-protection.json`](.github/branch-protection.json) is that rule as the API takes it — the aggregate check required, the branch up to date before merge, one approving review, and approvals dismissed when new commits land, so nobody approves one diff and merges another. Apply it once, substituting the default branch:
+
+```bash
+gh api -X PUT repos/:owner/:repo/branches/main/protection --input .github/branch-protection.json
+```
+
+`enforce_admins` stays `false` on purpose: on a repository with one maintainer, a required review nobody else can give would otherwise wall you off from your own default branch.
+
 ## Layout
 
 ```
@@ -105,6 +123,7 @@ frontend/         The UI. No build step
   nginx.conf      production routing and cache headers
   server.js       DEV ONLY static server + /api proxy
 assets/           README screenshot
+.github/          CI workflow and the branch protection rule it gates on
 ```
 
 ## Credits

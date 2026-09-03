@@ -49,9 +49,11 @@ npm --prefix frontend run dev
 
 ```bash
 npm test              # 79 tests
-npm run typecheck     # tsc --noEmit
+npm run typecheck     # src and test/, two configs — see below
 npm run cli -- info   # dataset provenance and declared gaps
 ```
+
+`typecheck` runs two configs, and the second one exists for a reason. `tsconfig.json` emits, so it has to exclude `test/` to keep it out of `dist/` — and Vitest transpiles the suite without typechecking it, which left the tests as the one corner of the codebase nobody checked. [`tsconfig.test.json`](tsconfig.test.json) covers `test/` and `vitest.config.ts` under the same strictness with `noEmit`. Run either half alone with `typecheck:src` / `typecheck:test`; CI runs them as separate steps so a red build names which one broke.
 
 **This is a JSON API and nothing else** — it serves no HTML, CSS or images. The [UI](../frontend) is a separate artefact with its own lifecycle, deployed independently to a static host or CDN. Keeping them apart is what lets the API scale, containerise and version on its own terms.
 

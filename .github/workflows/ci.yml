@@ -1,0 +1,145 @@
+# CI — the gate a pull request has to pass before it can be approved.
+#
+# Every push to a PR runs the backend test suite (typecheck + vitest, on the
+# three Node versions this project actually targets) and parses the frontend
+# modules. The `ci` job at the bottom aggregates them into one status check;
+# that is the check to require in branch protection, because matrix job names
+# change whenever the matrix changes and a pinned name would silently stop
+# gating.
+#
+# Note on scope: the 26 tests that need `data/pois.json` skip here. That file
+# is deliberately not committed (no upstream licence — see backend/.gitignore),
+# and rebuilding it needs network access to six upstream sources, which is not
+# something a PR gate should depend on. 53 fixture-driven tests run.
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Read-only. Nothing here writes to the repository.
+permissions:
+  contents: read
+
+# A new push to a PR cancels the run still going for the previous one.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # 20.11 is the floor in package.json engines, 22 is what the Docker
+        # image ships, 24 is current. All three have to stay green.
+        node: ['20.11', '22', '24']
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install (from lockfile)
+        run: npm ci
+
+      - name: Typecheck (src)
+        run: npm run typecheck:src
+
+      # Separate config: vitest transpiles the suite without checking it, so
+      # test/ would otherwise be the one unchecked corner of the codebase.
+      - name: Typecheck (tests)
+        run: npm run typecheck:test
+
+      - name: Test
+        run: >-
+          npx vitest run
+          --reporter=default
+          --reporter=github-actions
+          --reporter=junit
+          --outputFile.junit=./junit.xml
+
+      # Uploaded even on failure — this is the report you read when a PR is red.
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-node-${{ matrix.node }}
+          path: backend/junit.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The frontend has no build step and no dependencies, so there is nothing
+      # to compile. Parsing every module still catches the syntax error that
+      # would otherwise only show up in a browser after deploy.
+      - name: Parse every ES module
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          found=0
+          while IFS= read -r -d '' f; do
+            node --check "$f"
+            echo "ok  $f"
+            found=$((found + 1))
+          done < <(find . -name '*.js' -not -path './node_modules/*' -print0)
+          if [ "$found" -eq 0 ]; then
+            echo "::error::No JS files found — the check silently passed on nothing."
+            exit 1
+          fi
+          echo "$found module(s) parsed."
+
+  # Single required status check. Keep this job's name stable; point branch
+  # protection at "all checks green" and the matrix above can change freely.
+  ci:
+    name: all checks green
+    if: always()
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify no job failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "::error::A required job did not pass — this PR is not ready to approve."
+          exit 1
+
+      - name: Summary
+        run: |
+          {
+            echo "## CI green"
+            echo
+            echo "- backend: typecheck + vitest on Node 20.11 / 22 / 24"
+            echo "- frontend: every ES module parses"
+            echo
+            echo "The 26 tests covering the shipped dataset skip here by design:"
+            echo "\`backend/data/pois.json\` is not committed. Run them locally"
+            echo "after \`npm --prefix backend run data:fetch && npm --prefix backend run data:build\`."
+          } >> "$GITHUB_STEP_SUMMARY"

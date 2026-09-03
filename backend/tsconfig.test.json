@@ -1,0 +1,15 @@
+{
+  // tsconfig.json excludes test/ because that config emits, and test/ must stay
+  // out of dist/. Vitest transpiles without typechecking, so without this second
+  // config the test suite is the one part of the codebase whose types nobody
+  // ever checks. Same strictness as the build, noEmit, wider include.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist"]
+}
